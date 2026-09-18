@@ -1,0 +1,1707 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Airbantook Service — ใบเสนอราคาช่างแอร์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{
+    --navy:#0F3D73;
+    --navy-2:#1B5A9E;
+    --ice:#2E7FD6;
+    --ice-deep:#1E63B0;
+    --ice-light:#EAF3FC;
+    --frost:#7FD8E8;
+    --gold:#D98E2E;
+    --bg:#E4F4FC;
+    --card:#FFFFFF;
+    --text:#16213E;
+    --muted:#6B7A99;
+    --border:#DCE6F2;
+    --danger:#D9483C;
+    --success:#1F9D63;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Sarabun',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-tap-highlight-color:transparent;
+  }
+  #app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;padding-bottom:84px;}
+
+  /* ---------- Header ---------- */
+  .app-header{
+    background:linear-gradient(160deg,#A9E4FA 0%,#5CC0EC 100%);
+    color:var(--navy);
+    padding:22px 20px 18px;
+    position:relative;
+    overflow:hidden;
+  }
+  .app-header::after{
+    content:"";
+    position:absolute;right:-40px;top:-40px;width:160px;height:160px;
+    background:radial-gradient(circle,rgba(255,255,255,.6) 0%,rgba(255,255,255,0) 70%);
+  }
+  .brand-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .brand-icon{font-size:22px;}
+  .brand-name{font-family:'Kanit',sans-serif;font-weight:600;font-size:20px;letter-spacing:.2px;color:var(--navy);}
+  .header-tagline{margin-top:8px;font-size:13px;color:#2E5E78;line-height:1.5;}
+
+  /* ---------- Doc type tabs ---------- */
+  .doctabs{display:flex;gap:6px;padding:14px 16px 0;}
+  .doctab{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+    padding:12px 6px;border-radius:16px;font-family:'Kanit',sans-serif;font-weight:600;font-size:13px;
+    background:var(--card);color:var(--muted);border:1px solid var(--border);cursor:pointer;
+    transition:background .15s ease,color .15s ease,transform .1s ease;
+  }
+  .doctab.active{background:var(--ice);color:#fff;border-color:var(--ice);box-shadow:0 6px 16px rgba(46,127,214,.28);}
+  .doctab:active{transform:scale(.98);}
+
+  /* ---------- Cards ---------- */
+  .section{background:var(--card);margin:14px 16px 0;border-radius:var(--radius);padding:18px;box-shadow:0 1px 3px rgba(11,25,54,.05);}
+  .section-title{display:flex;align-items:center;gap:8px;font-family:'Kanit',sans-serif;font-weight:600;font-size:15px;color:var(--ice-deep);margin-bottom:14px;}
+  .section-title .n{font-size:17px;}
+  .section-note{font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:12px;}
+
+  label.field-label{display:block;font-size:13px;font-weight:600;color:var(--text);margin:0 0 6px;}
+  .field-row{display:flex;gap:10px;}
+  .field-row .field{flex:1;min-width:0;}
+  .field{margin-bottom:12px;}
+  .field:last-child{margin-bottom:0;}
+  input[type=text],input[type=tel],input[type=number],textarea,select{
+    width:100%;font-family:'Sarabun',sans-serif;font-size:15px;color:var(--text);
+    background:#F8FAFD;border:1.5px solid var(--border);border-radius:12px;
+    padding:12px 13px;outline:none;transition:border-color .15s ease,background .15s ease;
+  }
+  input:focus,textarea:focus,select:focus{border-color:var(--ice);background:#fff;}
+  textarea{resize:vertical;min-height:64px;line-height:1.5;}
+  ::placeholder{color:#A7B3C9;}
+
+  /* ---------- Quick items (home) ---------- */
+  .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+  .quick-chip{
+    padding:12px 13px;border-radius:14px;background:#fff;border:1.5px solid var(--border);cursor:pointer;
+    transition:all .12s ease;
+  }
+  .quick-chip .qc-name{font-weight:600;font-size:13.5px;color:var(--text);margin-bottom:3px;line-height:1.3;}
+  .quick-chip .qc-price{font-size:12px;color:var(--muted);}
+  .quick-chip.active{background:var(--ice-light);border-color:var(--ice);}
+  .quick-chip.active .qc-name{color:var(--ice-deep);}
+  .quick-chip:active{transform:scale(.97);}
+  .divider-label{text-align:center;font-size:12.5px;color:var(--muted);margin:6px 0 14px;position:relative;}
+  .divider-label::before,.divider-label::after{content:"";position:absolute;top:50%;width:32%;height:1px;background:var(--border);}
+  .divider-label::before{left:0;} .divider-label::after{right:0;}
+
+  .add-btn{
+    width:100%;margin-top:10px;padding:13px;border-radius:12px;border:1.5px dashed var(--ice);
+    background:#fff;color:var(--ice-deep);font-family:'Kanit',sans-serif;font-weight:600;font-size:14.5px;cursor:pointer;
+  }
+  .add-btn:active{background:var(--ice-light);}
+
+  /* ---------- Items list ---------- */
+  .item-row{
+    display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);
+  }
+  .item-row:last-child{border-bottom:none;padding-bottom:0;}
+  .item-main{flex:1;min-width:0;}
+  .item-desc{font-weight:600;font-size:14.5px;margin-bottom:6px;word-break:break-word;}
+  .item-sub{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  .mini-input{width:52px;padding:6px 6px;text-align:center;font-size:13px;border-radius:8px;}
+  .mini-input.price{width:78px;}
+  .item-unit{font-size:12.5px;color:var(--muted);}
+  .item-x{font-size:12.5px;color:var(--muted);}
+  .line-total{font-weight:600;font-size:14.5px;color:var(--ice-deep);white-space:nowrap;margin-left:auto;padding-left:4px;}
+  .remove-btn{
+    width:26px;height:26px;flex-shrink:0;border-radius:50%;border:none;background:#FCEBE9;color:var(--danger);
+    font-size:14px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+  .empty-note{text-align:center;color:var(--muted);font-size:13.5px;padding:14px 0;}
+
+  /* ---------- Totals ---------- */
+  .totals-box{
+    background:var(--navy);color:#fff;margin:16px 16px 0;border-radius:var(--radius);padding:18px 20px;
+    display:flex;flex-direction:column;gap:6px;
+  }
+  .totals-row{display:flex;justify-content:space-between;font-size:13.5px;color:#AEBAD6;}
+  .totals-row.net{margin-top:4px;padding-top:10px;border-top:1px solid rgba(255,255,255,.14);}
+  .totals-row.net .label{font-family:'Kanit',sans-serif;font-weight:600;font-size:15px;color:#fff;}
+  .totals-row.net .value{font-family:'Kanit',sans-serif;font-weight:700;font-size:24px;color:var(--frost);}
+
+  .primary-btn{
+    display:block;width:calc(100% - 32px);margin:16px auto 0;padding:16px;border:none;border-radius:16px;
+    background:var(--ice);color:#fff;font-family:'Kanit',sans-serif;font-weight:600;font-size:16px;
+    box-shadow:0 8px 20px rgba(46,127,214,.32);cursor:pointer;
+  }
+  .primary-btn:active{transform:scale(.99);}
+  .primary-btn.gold{background:var(--gold);box-shadow:0 8px 20px rgba(217,142,46,.32);}
+  .secondary-btn{
+    display:block;width:calc(100% - 32px);margin:10px auto 0;padding:14px;border-radius:14px;
+    background:#fff;border:1.5px solid var(--border);color:var(--text);font-family:'Kanit',sans-serif;font-weight:600;font-size:14.5px;cursor:pointer;text-align:center;
+  }
+  .btn-row{display:flex;gap:10px;width:calc(100% - 32px);margin:10px auto 0;}
+  .btn-row .secondary-btn{margin:0;flex:1;}
+  .secondary-btn.btn-green{background:var(--success);color:#fff;border-color:var(--success);}
+  .secondary-btn.btn-orange{background:var(--gold);color:#fff;border-color:var(--gold);}
+  .ghost-link{display:block;text-align:center;margin:14px auto 4px;font-size:13.5px;color:var(--muted);text-decoration:underline;cursor:pointer;}
+
+  /* ---------- Bottom nav ---------- */
+  .bottom-nav{
+    position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;
+    background:#fff;border-top:1px solid var(--border);display:flex;padding:10px 6px 14px;
+    box-shadow:0 -2px 10px rgba(11,25,54,.05);
+  }
+  .nav-item{flex:1;text-align:center;font-size:11.5px;color:var(--muted);cursor:pointer;font-weight:500;}
+  .nav-item .ic{font-size:21px;display:block;margin-bottom:2px;}
+  .nav-item.active{color:var(--ice-deep);font-weight:700;}
+
+  /* ---------- Preview / document ---------- */
+  .preview-top{display:flex;align-items:center;gap:12px;padding:16px 16px 4px;}
+  .back-btn{width:36px;height:36px;border-radius:50%;background:#fff;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;}
+  .preview-top .t{font-family:'Kanit',sans-serif;font-weight:600;font-size:16px;}
+
+  .theme-picker{display:flex;gap:8px;padding:0 16px;margin-top:14px;}
+  .theme-chip{flex:1;text-align:center;padding:10px 4px;border-radius:12px;background:#fff;border:1.5px solid var(--border);font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;}
+  .theme-chip.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+  .doc-paper{background:#fff;margin:14px 16px 0;border-radius:var(--radius);padding:22px 20px;box-shadow:0 1px 3px rgba(11,25,54,.06);overflow:hidden;position:relative;}
+  .watermark-overlay{position:absolute;inset:0;pointer-events:none;background-repeat:repeat;z-index:5;}
+
+  /* Header v2 (standard/classic) */
+  .doc-head-v2{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding-bottom:14px;}
+  .head-left{display:flex;gap:10px;align-items:center;min-width:0;}
+  .doc-logo-box{width:50px;height:50px;border-radius:12px;border:2px solid var(--ice);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;overflow:hidden;background:#fff;}
+  .doc-logo-box img{width:100%;height:100%;object-fit:contain;}
+  .shop-name{font-family:'Kanit',sans-serif;font-weight:600;font-size:17px;color:var(--navy);}
+  .shop-tagline{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .head-right{text-align:right;flex-shrink:0;}
+  .doc-eng-label{font-family:'Kanit',sans-serif;font-weight:700;font-size:19px;color:var(--navy);letter-spacing:.5px;}
+  .doc-th-label{font-size:12.5px;color:var(--muted);margin-top:1px;}
+  .doc-no,.doc-date{font-size:11.5px;color:var(--muted);margin-top:4px;}
+  .head-divider{height:2px;background:var(--navy);margin-bottom:16px;}
+
+  /* Customer info box (standard) */
+  .doc-info-box{border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px;background:#F8FAFD;}
+  .doc-info-box .info-row{display:flex;gap:8px;font-size:13.5px;margin-bottom:4px;}
+  .doc-info-box .info-row:last-child{margin-bottom:0;}
+  .doc-info-box .info-row .k{color:var(--muted);flex-shrink:0;}
+  .doc-info-box .info-row b{color:var(--text);font-weight:600;}
+
+  /* Inline customer row (classic) */
+  .inline-customer-row{font-size:13.5px;line-height:1.8;margin-bottom:16px;color:var(--text);}
+  .inline-customer-row b{color:var(--navy);}
+
+  /* Hero header (premium) */
+  .doc-hero{background:var(--navy);margin:-22px -20px 16px;padding:22px 20px 20px;border-radius:18px 18px 0 0;}
+  .doc-pill{display:inline-block;background:rgba(255,255,255,.12);color:var(--frost);font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;margin-bottom:10px;}
+  .hero-shop-name{font-family:'Kanit',sans-serif;font-weight:700;font-size:22px;color:#fff;}
+  .two-col-row{display:flex;justify-content:space-between;gap:12px;margin-bottom:16px;}
+  .two-col-row .k{font-size:11.5px;color:var(--muted);margin-bottom:3px;}
+  .two-col-row .v-bold{font-weight:700;font-size:15px;color:var(--text);}
+  .two-col-row .v-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+
+  /* Item table */
+  .doc-table{width:100%;border-collapse:collapse;font-size:13.5px;margin-bottom:4px;}
+  .doc-table th{text-align:left;font-size:11.5px;font-weight:600;}
+  .doc-table th.r{text-align:right;}
+  .doc-table td{padding:8px 4px;border-bottom:1px dashed var(--border);vertical-align:top;}
+  .doc-table td.r{text-align:right;white-space:nowrap;}
+  .doc-table-navy th,.doc-table-light th{border-radius:0;}
+  .doc-table-navy td:first-child,.doc-table-light td:first-child{padding-left:6px;}
+
+  /* Totals variants */
+  .footer-2col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;align-items:stretch;}
+  .totals-mini-box{border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
+  .totals-mini-box .row{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);padding:3px 0;}
+  .totals-mini-box .row.net{border-top:1px dashed var(--border);margin-top:6px;padding-top:8px;font-weight:700;color:var(--navy);font-size:15px;}
+  .callout-total{background:var(--ice-light);border-radius:14px;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;margin-top:14px;}
+  .callout-total .lbl{font-size:13px;color:var(--muted);}
+  .callout-total .amt{font-family:'Kanit',sans-serif;font-weight:700;font-size:22px;color:var(--navy);}
+  .callout-total-inline{background:var(--ice-light);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;}
+  .callout-total-inline .lbl{font-size:12px;color:var(--muted);margin-bottom:4px;}
+  .callout-total-inline .amt{font-family:'Kanit',sans-serif;font-weight:700;font-size:19px;color:var(--navy);}
+  .premium-totals-box{background:#FFFBEF;border:1.5px solid #E8D9A8;border-radius:14px;padding:16px 18px;margin-top:2px;}
+  .premium-totals-box .row{display:flex;justify-content:space-between;font-size:13px;color:#8A7A45;padding:3px 0;}
+  .premium-totals-box .divider-dashed{border-top:1px dashed #E0CE96;margin:8px 0;}
+  .premium-totals-box .row.net{font-family:'Kanit',sans-serif;font-weight:700;font-size:18px;color:var(--navy);}
+
+  /* Terms / notes box */
+  .terms-box{border:1.5px solid var(--border);background:#F8FAFD;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:13px;line-height:1.8;}
+  .terms-box.premium-tone{border-color:#E8D9A8;background:#FFFBEF;}
+  .terms-title{font-weight:700;font-size:13px;margin-bottom:6px;color:var(--text);}
+  .terms-line{margin-bottom:3px;}
+  .terms-line:last-child{margin-bottom:0;}
+  .terms-line b{color:var(--text);}
+
+  .doc-note{margin-top:14px;font-size:13px;color:var(--muted);background:#F8FAFD;border-radius:10px;padding:10px 12px;line-height:1.6;}
+  .doc-thanks{text-align:center;font-size:12.5px;color:var(--muted);font-style:italic;margin-top:18px;}
+  .doc-contact{text-align:center;font-size:11.5px;color:var(--muted);margin-top:6px;}
+  .req-meta-row{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;margin-bottom:6px;color:var(--text);flex-wrap:wrap;}
+  .req-meta-row b{color:var(--navy);}
+  .sig-pad-wrap{border:1.5px dashed var(--border);border-radius:12px;overflow:hidden;background:#F8FAFD;}
+  .sig-pad-canvas{width:100%;height:150px;display:block;touch-action:none;}
+  .doc-foot{margin-top:6px;text-align:center;font-size:11px;color:#B9C2D6;}
+
+  /* Signature blocks */
+  .sign-grid-2{display:flex;gap:16px;margin-top:22px;}
+  .sign-grid-2 .box{flex:1;text-align:center;}
+  .sign-grid-2 .line{border-bottom:1px dashed var(--border);height:36px;}
+  .sign-grid-2 .lbl{font-size:12px;color:var(--muted);margin-top:6px;font-weight:600;}
+  .sign-grid-2 .date-ph{font-size:11px;color:var(--muted);margin-top:4px;}
+  .sign-single{display:flex;justify-content:flex-end;margin-top:18px;}
+  .sign-single .box{width:46%;text-align:center;}
+  .sign-single .line{border-bottom:1px dashed var(--border);height:34px;}
+  .sign-single .lbl{font-size:12px;color:var(--muted);margin-top:6px;font-weight:600;}
+
+  .doc-pp{margin-top:16px;padding-top:16px;border-top:1px dashed var(--border);text-align:center;}
+  .doc-pp .lbl{font-size:12.5px;color:var(--muted);margin-bottom:10px;}
+  .doc-pp .qrwrap{display:flex;justify-content:center;}
+
+  /* Premium theme base surface */
+  .doc-paper.theme-premium .doc-thanks,.doc-paper.theme-premium .doc-foot{color:var(--muted);}
+
+  /* Classic theme base surface */
+  .doc-paper.theme-classic{border:2px solid var(--text);border-radius:4px;}
+  .doc-paper.theme-classic .doc-table-navy th,.doc-paper.theme-classic .doc-table-navy td{border:1px solid #B8BFCC;}
+  .doc-paper.theme-classic .head-divider{background:var(--text);}
+
+  .toast{
+    position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(10px);
+    background:var(--navy);color:#fff;padding:11px 18px;border-radius:30px;font-size:13.5px;
+    opacity:0;transition:opacity .2s ease, transform .2s ease;pointer-events:none;z-index:50;max-width:90vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .hist-card{background:#fff;margin:0 16px 12px;border-radius:16px;padding:15px 16px;box-shadow:0 1px 3px rgba(11,25,54,.05);display:flex;align-items:center;gap:12px;cursor:pointer;}
+  .hist-icon{width:38px;height:38px;border-radius:12px;background:var(--ice-light);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+  .hist-mid{flex:1;min-width:0;}
+  .hist-name{font-weight:600;font-size:14.5px;}
+  .hist-date{font-size:12px;color:var(--muted);margin-top:2px;}
+  .hist-amt{font-family:'Kanit',sans-serif;font-weight:600;font-size:15px;color:var(--ice-deep);white-space:nowrap;}
+  .hist-del{width:28px;height:28px;border-radius:50%;background:#FCEBE9;color:var(--danger);border:none;font-size:13px;flex-shrink:0;}
+  .page-title{font-family:'Kanit',sans-serif;font-weight:600;font-size:19px;padding:20px 16px 4px;color:var(--navy);}
+  .page-sub{font-size:13px;color:var(--muted);padding:0 16px 6px;}
+
+  /* Quick item preset cards (settings) */
+  .qi-card{display:flex;align-items:center;gap:10px;border:1.5px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;}
+  .qi-info{flex:1;min-width:0;}
+  .qi-item-name{font-weight:600;font-size:14.5px;color:var(--text);}
+  .qi-item-unit{font-size:12px;color:var(--muted);margin-top:2px;}
+  .qi-card input.qi-price{width:100px;flex-shrink:0;text-align:center;padding:10px 8px;font-size:15px;}
+  .qi-card .qi-del{width:38px;height:38px;border-radius:10px;background:#FCEBE9;border:none;color:var(--danger);font-size:15px;flex-shrink:0;cursor:pointer;}
+
+  .file-label{cursor:pointer;}
+  .switch{width:46px;height:26px;border-radius:20px;background:var(--border);position:relative;flex-shrink:0;cursor:pointer;transition:background .15s;}
+  .switch.on{background:var(--ice);}
+  .switch .knob{width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+  .switch.on .knob{left:23px;}
+  .accent-swatch{width:38px;height:38px;border-radius:50%;cursor:pointer;border:3px solid #fff;box-shadow:0 0 0 1.5px var(--border);}
+  .accent-swatch.active{box-shadow:0 0 0 2.5px var(--text);}
+  .logo-row{display:flex;align-items:center;gap:12px;}
+  .logo-thumb{width:48px;height:48px;object-fit:contain;border-radius:10px;border:1px solid var(--border);background:#fff;}
+  .logo-placeholder{width:48px;height:48px;border-radius:10px;border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--muted);flex-shrink:0;}
+
+  .img-modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(11,25,54,.92);z-index:100;
+    flex-direction:column;align-items:center;justify-content:center;padding:20px;
+  }
+  .img-modal-top{width:100%;max-width:480px;display:flex;justify-content:flex-end;margin-bottom:12px;}
+  .img-modal-close{color:#fff;font-family:'Kanit',sans-serif;font-weight:600;font-size:14px;padding:8px 14px;border:1.5px solid rgba(255,255,255,.3);border-radius:20px;cursor:pointer;}
+  .img-modal-body{flex:1;width:100%;max-width:480px;display:flex;align-items:center;justify-content:center;overflow:auto;}
+  .img-modal-body img{max-width:100%;max-height:70vh;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.4);}
+  .img-modal-hint{color:#fff;font-size:13px;text-align:center;margin-top:16px;max-width:480px;line-height:1.6;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" class="toast"></div>
+
+<script>
+/* ================= DATA ================= */
+const THAI_MONTHS=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+const DEFAULT_QUICK_ITEMS=[
+  {desc:"ล้างแอร์ (ผนัง)",unit:"เครื่อง",price:600},
+  {desc:"ล้างแอร์ (ถอดล้างใหญ่)",unit:"เครื่อง",price:1200},
+  {desc:"ล้างแอร์แขวน/ฝังฝ้า",unit:"เครื่อง",price:1000},
+  {desc:"ติดตั้งแอร์ 9,000-12,000 BTU",unit:"เครื่อง",price:3500},
+  {desc:"ติดตั้งแอร์ 18,000-24,000 BTU",unit:"เครื่อง",price:5000},
+  {desc:"ถอดแอร์",unit:"เครื่อง",price:1000},
+  {desc:"ย้ายแอร์ (ถอด+ติดตั้งใหม่)",unit:"เครื่อง",price:2500},
+  {desc:"เติมน้ำยาแอร์ R32 (ไม่เกิน 50 PSI)",unit:"ครั้ง",price:800},
+  {desc:"เติมน้ำยาแอร์ R410A",unit:"ครั้ง",price:1200},
+  {desc:"ซ่อมแอร์ไม่เย็น / เช็ครั่ว",unit:"งาน",price:800},
+  {desc:"เปลี่ยนแคปรัน (Capacitor)",unit:"ตัว",price:600},
+  {desc:"เดินท่อน้ำยาแอร์เพิ่ม",unit:"เมตร",price:450},
+  {desc:"ตรวจเช็ค/ซ่อมเบื้องต้น",unit:"ครั้ง",price:400},
+];
+const WARRANTY_OPTIONS=["ไม่มีรับประกัน","30 วัน","3 เดือน","6 เดือน","1 ปี","2 ปี"];
+const THEME_LABELS={standard:"มาตรฐาน",premium:"Premium",classic:"Classic"};
+const ACCENT_PRESETS={
+  navy:{ice:"#2E7FD6",iceDeep:"#1E63B0",iceLight:"#EAF3FC"},
+  green:{ice:"#1F9D63",iceDeep:"#167A4C",iceLight:"#E7F7EF"},
+  black:{ice:"#33363E",iceDeep:"#1C1E24",iceLight:"#EDEEF0"},
+  orange:{ice:"#D9622E",iceDeep:"#B84D22",iceLight:"#FCEEE7"},
+};
+const DEFAULT_SHOP={name:"",phone:"",address:"",tagline:"",lineId:"",lineLink:"",bankInfo:"",promptpay:"",paymentTerms:"",footerNote:"",logo:"",showSignature:false,accent:"navy"};
+
+/* ================= LICENSE / SUBSCRIPTION =================
+   Static-site license check. This is a practical deterrent for real
+   paying customers, NOT unbreakable security — anyone reading this
+   source could in principle work out the check. That's an inherent
+   limit of a no-backend app; treat it the same as the reference app's
+   own unlock-code system.
+   IMPORTANT: change these two to your own values before distributing:
+   - LICENSE_SECRET must exactly match the one in license-generator.html
+   - ADMIN_CONTACT_LINE should be YOUR OWN admin LINE link (for selling
+     subscriptions to this software) — this is separate from each
+     shop's own customer-facing LINE set in Settings. */
+const LICENSE_SECRET="AIRBANTOOK-LICENSE-2026";
+const ADMIN_CONTACT_LINE="https://lin.ee/uIxdTV5";
+
+let state={
+  view:"home",           // home | preview | history | settings
+  docType:"quote",       // quote | receipt | requisition
+  theme:"standard",      // standard | premium | classic
+  customer:{name:"",phone:"",location:""},
+  req:{store:"",requester:""},
+  approverSignature:"",
+  items:[],
+  draft:{desc:"",qty:1,unit:"เครื่อง",price:0},
+  discount:0,
+  includeVat:false,
+  warranty:"1 ปี",
+  notes:"",
+  payment:{method:"cash",received:0},
+  shop:{...DEFAULT_SHOP},
+  history:[],
+  quickItems:DEFAULT_QUICK_ITEMS.slice(),
+  activeDoc:null,
+  licenseExpiry:null,
+};
+
+/* ================= STORAGE HELPERS =================
+   Uses the browser's own localStorage — this is a real hosted website now
+   (not running inside Claude's artifact sandbox), so the standard web
+   storage API is what actually works here, on any device/browser. */
+const STORAGE_PREFIX="airbantook:";
+async function safeGet(key){
+  try{ return localStorage.getItem(STORAGE_PREFIX+key); }
+  catch(e){ return null; }
+}
+async function safeSet(key,value){
+  const payload = JSON.stringify(value);
+  try{
+    localStorage.setItem(STORAGE_PREFIX+key, payload);
+    return true;
+  }catch(e){
+    console.warn("storage set failed for key:",key, (e&&e.message)||e);
+    return false;
+  }
+}
+async function loadAll(){
+  const shopRaw=await safeGet("shop-settings");
+  if(shopRaw){ try{ state.shop={...DEFAULT_SHOP,...JSON.parse(shopRaw)}; }catch(e){} }
+  const histRaw=await safeGet("quotes-history");
+  if(histRaw){ try{ state.history=JSON.parse(histRaw); }catch(e){ state.history=[]; } }
+  const qiRaw=await safeGet("quick-items");
+  if(qiRaw){ try{ const parsed=JSON.parse(qiRaw); if(Array.isArray(parsed)&&parsed.length) state.quickItems=parsed; }catch(e){} }
+  const themeRaw=await safeGet("ui-theme");
+  if(themeRaw){ try{ const t=JSON.parse(themeRaw); if(THEME_LABELS[t]) state.theme=t; }catch(e){} }
+  const licRaw=await safeGet("license-expiry");
+  if(licRaw){ try{ state.licenseExpiry=JSON.parse(licRaw); }catch(e){} }
+  applyAccent(state.shop.accent||"navy");
+  render();
+}
+
+/* ================= UTIL ================= */
+function baht(n){ n=Number(n)||0; return n.toLocaleString("th-TH",{minimumFractionDigits:0,maximumFractionDigits:2}); }
+function thaiDate(d){ d=d||new Date(); return `${d.getDate()} ${THAI_MONTHS[d.getMonth()]} ${d.getFullYear()+543}`; }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function esc(s){ return (s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  clearTimeout(showToast._t);
+  showToast._t=setTimeout(()=>t.classList.remove("show"),2000);
+}
+function subtotal(){ return state.items.reduce((s,i)=>s+(Number(i.qty)||0)*(Number(i.price)||0),0); }
+function netBeforeVat(){ return Math.max(0, subtotal()-(Number(state.discount)||0)); }
+function vatAmount(){ return (state.docType==="quote" && state.includeVat) ? netBeforeVat()*0.07 : 0; }
+function netTotal(){ return netBeforeVat()+vatAmount(); }
+function applyAccent(key){
+  const p=ACCENT_PRESETS[key]||ACCENT_PRESETS.navy;
+  document.documentElement.style.setProperty("--ice",p.ice);
+  document.documentElement.style.setProperty("--ice-deep",p.iceDeep);
+  document.documentElement.style.setProperty("--ice-light",p.iceLight);
+}
+
+/* ================= PROMPTPAY QR ================= */
+function crc16ccitt(str){
+  let crc=0xFFFF;
+  for(let c=0;c<str.length;c++){
+    crc ^= str.charCodeAt(c) << 8;
+    for(let i=0;i<8;i++){
+      if((crc & 0x8000)!==0) crc=(crc<<1) ^ 0x1021;
+      else crc<<=1;
+      crc &= 0xFFFF;
+    }
+  }
+  return crc.toString(16).toUpperCase().padStart(4,"0");
+}
+function tlv(id,value){ return id+String(value.length).padStart(2,"0")+value; }
+function generatePromptPayPayload(target,amount){
+  target=(target||"").replace(/[^0-9]/g,"");
+  if(!target) return null;
+  let merchantInfo;
+  if(target.length===13){
+    merchantInfo=tlv("00","A000000677010111")+tlv("02",target);
+  }else{
+    let phone=target;
+    if(phone.startsWith("0")) phone=phone.substring(1);
+    phone="0066"+phone;
+    merchantInfo=tlv("00","A000000677010111")+tlv("01",phone);
+  }
+  let payload="";
+  payload+=tlv("00","01");
+  payload+=tlv("01",(amount&&amount>0)?"12":"11");
+  payload+=tlv("29",merchantInfo);
+  payload+=tlv("53","764");
+  if(amount && amount>0) payload+=tlv("54",Number(amount).toFixed(2));
+  payload+=tlv("58","TH");
+  payload+="6304";
+  return payload+crc16ccitt(payload);
+}
+function renderPromptPayQR(){
+  const el=document.getElementById("ppqr");
+  if(!el || !state.activeDoc || !state.activeDoc.shop.promptpay) return;
+  el.innerHTML="";
+  const payload=generatePromptPayPayload(state.activeDoc.shop.promptpay, state.activeDoc.total);
+  if(!payload) return;
+  try{ new QRCode(el,{text:payload,width:160,height:160,correctLevel:QRCode.CorrectLevel.M}); }catch(e){}
+}
+
+/* ================= LICENSE CHECK ================= */
+function simpleHash(str){
+  let h=0;
+  for(let i=0;i<str.length;i++){ h=(Math.imul(31,h)+str.charCodeAt(i))|0; }
+  return (h>>>0).toString(36).toUpperCase();
+}
+function isLicensed(){
+  if(!state.licenseExpiry) return false;
+  return new Date(state.licenseExpiry).getTime() > Date.now();
+}
+function licenseDaysLeft(){
+  if(!state.licenseExpiry) return 0;
+  return Math.max(0, Math.ceil((new Date(state.licenseExpiry).getTime()-Date.now())/86400000));
+}
+function redeemLicenseCode(code){
+  code=(code||"").trim().replace(/\s+/g,"");
+  if(!code) return {ok:false,msg:"กรอกรหัสก่อน"};
+  let raw;
+  try{ raw=atob(code); }catch(e){ return {ok:false,msg:"รหัสไม่ถูกต้อง"}; }
+  const parts=raw.split("|");
+  if(parts.length!==2) return {ok:false,msg:"รหัสไม่ถูกต้อง"};
+  const expiryISO=parts[0], sig=parts[1];
+  if(simpleHash(expiryISO+LICENSE_SECRET)!==sig) return {ok:false,msg:"รหัสไม่ถูกต้องหรือปลอม"};
+  const expiryDate=new Date(expiryISO+"T23:59:59");
+  if(isNaN(expiryDate.getTime())) return {ok:false,msg:"รหัสไม่ถูกต้อง"};
+  return {ok:true,expiryISO:expiryDate.toISOString()};
+}
+async function applyLicenseCode(){
+  const input=document.getElementById("licenseCodeInput");
+  if(!input) return;
+  const result=redeemLicenseCode(input.value);
+  if(!result.ok){ showToast(result.msg); return; }
+  state.licenseExpiry=result.expiryISO;
+  const ok=await safeSet("license-expiry", state.licenseExpiry);
+  if(ok){ showToast("เปิดใช้งานสำเร็จ ขอบคุณที่สมัครสมาชิก 🎉"); render(); }
+  else{ showToast("บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง"); }
+}
+function watermarkOverlayHTML(){
+  if(isLicensed()) return "";
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="260" height="170"><text x="6" y="100" transform="rotate(-28 130 85)" font-family="Kanit, sans-serif" font-size="24" font-weight="700" fill="rgba(15,61,115,0.12)">ทดลองใช้งาน</text></svg>`;
+  const url="data:image/svg+xml,"+encodeURIComponent(svg);
+  return `<div class="watermark-overlay" style="background-image:url('${url}');"></div>`;
+}
+
+/* ================= STATE MUTATORS ================= */
+function setField(path,value){
+  const parts=path.split(".");
+  let obj=state;
+  for(let i=0;i<parts.length-1;i++) obj=obj[parts[i]];
+  obj[parts[parts.length-1]]=value;
+}
+function toggleQuickItem(idx){
+  const q=state.quickItems[idx];
+  const existingIdx=state.items.findIndex(i=>i.desc===q.desc && i.fromQuick);
+  if(existingIdx>-1){ state.items.splice(existingIdx,1); }
+  else{ state.items.push({id:uid(),desc:q.desc,qty:1,unit:q.unit,price:q.price,fromQuick:true}); }
+  render();
+}
+function addCustomItem(){
+  if(!state.draft.desc.trim()){ showToast("กรอกรายละเอียดก่อนเพิ่มรายการ"); return; }
+  state.items.push({id:uid(),desc:state.draft.desc.trim(),qty:Number(state.draft.qty)||1,unit:state.draft.unit||"เครื่อง",price:Number(state.draft.price)||0,fromQuick:false});
+  state.draft={desc:"",qty:1,unit:"เครื่อง",price:0};
+  render();
+}
+function removeItem(id){ state.items=state.items.filter(i=>i.id!==id); render(); }
+function updateItemLive(id,field,value){
+  const it=state.items.find(i=>i.id===id); if(!it) return;
+  it[field]= field==="desc" ? value : (Number(value)||0);
+  const row=document.querySelector(`.item-row[data-id="${id}"] .line-total`);
+  if(row) row.textContent="฿"+baht((Number(it.qty)||0)*(Number(it.price)||0));
+  updateTotalsBoxDom();
+}
+function updateTotalsBoxDom(){
+  const box=document.getElementById("totalsBox");
+  if(!box) return;
+  box.innerHTML=totalsBoxInner();
+}
+
+/* ---- quick item preset management (settings) ---- */
+function updateQuickPresetLive(idx,field,value){
+  if(!state.quickItems[idx]) return;
+  state.quickItems[idx][field]= field==="price" ? (Number(value)||0) : value;
+}
+function addQuickPreset(){
+  const d=document.getElementById("newQDesc").value.trim();
+  const u=document.getElementById("newQUnit").value.trim()||"เครื่อง";
+  const p=Number(document.getElementById("newQPrice").value)||0;
+  if(!d){ showToast("กรอกชื่องานก่อนเพิ่ม"); return; }
+  state.quickItems.push({desc:d,unit:u,price:p});
+  render();
+  showToast("เพิ่มรายการเร็วแล้ว — อย่าลืมกดบันทึก");
+}
+function removeQuickPreset(idx){
+  state.quickItems.splice(idx,1);
+  render();
+  showToast("ลบแล้ว — อย่าลืมกดบันทึก");
+}
+async function saveQuickItems(){
+  const ok=await safeSet("quick-items",state.quickItems);
+  showToast(ok ? "บันทึกรายการเร็วแล้ว" : "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง");
+}
+
+/* ---- logo handling ---- */
+function handleLogoUpload(file){
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    const img=new Image();
+    img.onload=()=>{
+      const maxW=160;
+      const scale=Math.min(1,maxW/img.width);
+      const w=Math.round(img.width*scale), h=Math.round(img.height*scale);
+      const canvas=document.createElement("canvas");
+      canvas.width=w; canvas.height=h;
+      const ctx=canvas.getContext("2d");
+      ctx.fillStyle="#ffffff";
+      ctx.fillRect(0,0,w,h);
+      ctx.drawImage(img,0,0,w,h);
+      state.shop.logo=canvas.toDataURL("image/jpeg",0.72);
+      render();
+      showToast("อัปโหลดโลโก้แล้ว — กดบันทึกข้อมูลร้าน");
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function removeLogo(){ state.shop.logo=""; render(); showToast("ลบโลโก้แล้ว — กดบันทึกข้อมูลร้าน"); }
+
+/* ================= NAVIGATION ================= */
+function goView(v){ state.view=v; render(); window.scrollTo(0,0); }
+function setDocType(t){ state.docType=t; render(); }
+function setTheme(t){ state.theme=t; safeSet("ui-theme",t); render(); }
+function setAccent(k){ state.shop.accent=k; applyAccent(k); render(); }
+function toggleSignature(){ state.shop.showSignature=!state.shop.showSignature; render(); }
+function toggleVat(){ state.includeVat=!state.includeVat; render(); }
+
+/* ================= BUILD PREVIEW DOC ================= */
+function buildDocFromDraft(){
+  if(state.items.length===0){ showToast("เพิ่มรายการอย่างน้อย 1 รายการก่อน"); return null; }
+  const now=new Date();
+  if(state.docType==="requisition"){
+    const docNo="RQ-"+now.getFullYear()+String(now.getMonth()+1).padStart(2,"0")+String(now.getDate()).padStart(2,"0")+"-"+String(now.getHours()).padStart(2,"0")+String(now.getMinutes()).padStart(2,"0");
+    return {
+      id:uid(),
+      docType:"requisition",
+      docNo,
+      dateISO:now.toISOString(),
+      shop:{...state.shop},
+      req:{...state.req},
+      items:JSON.parse(JSON.stringify(state.items)),
+      notes:state.notes,
+      totalQty:state.items.reduce((s,i)=>s+(Number(i.qty)||0),0),
+      approverSignature:state.approverSignature||"",
+    };
+  }
+  const prefix= state.docType==="quote" ? "QT" : "RC";
+  const docNo= prefix+"-"+now.getFullYear()+String(now.getMonth()+1).padStart(2,"0")+String(now.getDate()).padStart(2,"0")+"-"+String(now.getHours()).padStart(2,"0")+String(now.getMinutes()).padStart(2,"0");
+  return {
+    id:uid(),
+    docType:state.docType,
+    docNo,
+    dateISO:now.toISOString(),
+    shop:{...state.shop},
+    customer:{...state.customer},
+    items:JSON.parse(JSON.stringify(state.items)),
+    discount:Number(state.discount)||0,
+    warranty:state.warranty,
+    notes:state.notes,
+    payment:{...state.payment},
+    subtotal:subtotal(),
+    includeVat: state.docType==="quote" ? state.includeVat : false,
+    vat: vatAmount(),
+    total:netTotal(),
+  };
+}
+async function openPreview(){
+  const doc=buildDocFromDraft();
+  if(!doc) return;
+  state.activeDoc=doc;
+  goView("preview");
+  const newHistory=[doc,...state.history];
+  const ok=await safeSet("quotes-history",newHistory);
+  if(ok){
+    state.history=newHistory;
+    if(state.view==="preview") render();
+  }else{
+    showToast("บันทึกอัตโนมัติไม่สำเร็จ ลองกดปุ่มบันทึกลงประวัติอีกครั้ง");
+  }
+}
+function openHistoryDoc(id){
+  const doc=state.history.find(h=>h.id===id);
+  if(!doc) return;
+  state.activeDoc=doc;
+  goView("preview");
+}
+async function saveActiveDoc(){
+  if(!state.activeDoc) return;
+  const exists=state.history.some(h=>h.id===state.activeDoc.id);
+  if(!exists){
+    const prevHistory=state.history.slice();
+    state.history.unshift(state.activeDoc);
+    const ok=await safeSet("quotes-history",state.history);
+    if(ok){ showToast("บันทึกลงประวัติแล้ว"); render(); }
+    else{ state.history=prevHistory; showToast("บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง"); }
+  }
+  else{ showToast("บันทึกไว้แล้ว"); }
+}
+async function deleteHistoryDoc(id,ev){
+  if(ev) ev.stopPropagation();
+  if(!confirm("ลบเอกสารนี้ออกจากประวัติ?")) return;
+  state.history=state.history.filter(h=>h.id!==id);
+  await safeSet("quotes-history",state.history);
+  render();
+}
+function convertQuoteToReceipt(){
+  const doc=state.activeDoc;
+  if(!doc) return;
+  state.customer={...doc.customer};
+  state.items=JSON.parse(JSON.stringify(doc.items));
+  state.discount=doc.discount;
+  state.notes=doc.notes;
+  state.docType="receipt";
+  state.includeVat=false;
+  state.payment={method:"cash",received:0};
+  state.activeDoc=null;
+  goView("home");
+  showToast("แปลงเป็นใบเสร็จแล้ว กรอกยอดรับเงินแล้วดูตัวอย่างได้เลย");
+}
+
+/* ================= TEXT GENERATION FOR SHARE ================= */
+function docText(doc){
+  if(doc.docType==="requisition"){
+    const lines=[];
+    lines.push("📦 ใบเบิกสินค้า  "+doc.docNo);
+    if(doc.shop.name) lines.push("บริษัท/ร้าน: "+doc.shop.name);
+    lines.push("——————————————");
+    if(doc.req.store) lines.push("ร้านค้า: "+doc.req.store);
+    if(doc.req.requester) lines.push("ผู้เบิกของ: "+doc.req.requester);
+    lines.push("วันที่: "+thaiDate(new Date(doc.dateISO)));
+    lines.push("——————————————");
+    lines.push("รายการ:");
+    doc.items.forEach((it,idx)=>{
+      lines.push(`${idx+1}. ${it.desc}  x${it.qty} ${it.unit}`);
+    });
+    lines.push("——————————————");
+    lines.push("รวมจำนวนทั้งหมด: "+doc.totalQty);
+    if(doc.notes){ lines.push("——————————————"); lines.push("รายละเอียดเพิ่มเติม: "+doc.notes); }
+    return lines.join("\n");
+  }
+  const isQuote= doc.docType==="quote";
+  const lines=[];
+  lines.push((isQuote?"📋 ใบเสนอราคา":"🧾 ใบเสร็จรับเงิน")+"  "+doc.docNo);
+  if(doc.shop.name) lines.push("ร้าน: "+doc.shop.name);
+  if(doc.shop.phone) lines.push("โทร: "+doc.shop.phone);
+  if(doc.shop.lineId) lines.push("LINE: "+doc.shop.lineId);
+  if(doc.shop.lineLink) lines.push("แอดไลน์ร้าน: "+doc.shop.lineLink);
+  if(doc.shop.bankInfo) lines.push("บัญชี: "+doc.shop.bankInfo);
+  lines.push("——————————————");
+  if(doc.customer.name) lines.push("ลูกค้า: "+doc.customer.name);
+  if(doc.customer.phone) lines.push("เบอร์: "+doc.customer.phone);
+  if(doc.customer.location) lines.push("สถานที่: "+doc.customer.location);
+  lines.push("วันที่: "+thaiDate(new Date(doc.dateISO)));
+  lines.push("——————————————");
+  lines.push("รายการ:");
+  doc.items.forEach((it,idx)=>{
+    lines.push(`${idx+1}. ${it.desc}  x${it.qty} ${it.unit}  ฿${baht(it.qty*it.price)}`);
+  });
+  lines.push("——————————————");
+  lines.push("รวม: ฿"+baht(doc.subtotal));
+  if(doc.discount>0) lines.push("ส่วนลด: ฿"+baht(doc.discount));
+  if(isQuote && doc.includeVat) lines.push("ภาษีมูลค่าเพิ่ม 7%: ฿"+baht(doc.vat));
+  if(isQuote) lines.push("รับประกัน: "+doc.warranty);
+  lines.push((isQuote?"ยอดสุทธิ":"ยอดชำระ")+": ฿"+baht(doc.total));
+  if(!isQuote){
+    lines.push("ชำระโดย: "+(doc.payment.method==="cash"?"เงินสด":"โอนเงิน"));
+    if(doc.payment.method==="cash"){
+      lines.push("รับเงิน: ฿"+baht(doc.payment.received));
+      lines.push("เงินทอน: ฿"+baht(Math.max(0,(Number(doc.payment.received)||0)-doc.total)));
+    }
+  }
+  if(doc.shop.paymentTerms) lines.push("เงื่อนไขติดตั้ง: "+doc.shop.paymentTerms);
+  if(doc.notes) { lines.push("——————————————"); lines.push("หมายเหตุ: "+doc.notes); }
+  if(doc.shop.footerNote){ lines.push("——————————————"); lines.push(doc.shop.footerNote); }
+  return lines.join("\n");
+}
+function shareLine(){
+  const text=docText(state.activeDoc);
+  const url="https://line.me/R/msg/text/?"+encodeURIComponent(text);
+  let win=null;
+  try{ win=window.open(url,"_blank"); }catch(e){ win=null; }
+  if(!win){
+    try{ window.location.href=url; }
+    catch(e){ showToast("เปิด LINE ไม่ได้ ลองเปิดไฟล์นี้ในเบราว์เซอร์มือถือแทน"); }
+  }
+}
+async function copyDocText(){
+  const text=docText(state.activeDoc);
+  try{
+    await navigator.clipboard.writeText(text);
+    showToast("คัดลอกข้อความแล้ว");
+  }catch(e){ showToast("คัดลอกไม่สำเร็จ กรุณาลองใหม่"); }
+}
+async function nativeShare(){
+  const text=docText(state.activeDoc);
+  if(navigator.share){
+    try{ await navigator.share({text}); }catch(e){}
+  }else{ copyDocText(); }
+}
+
+/* ---- guaranteed image preview modal (works even when downloads/share are blocked) ---- */
+function showImageModal(dataUrl,filename){
+  let overlay=document.getElementById("imgModalOverlay");
+  if(!overlay){
+    overlay=document.createElement("div");
+    overlay.id="imgModalOverlay";
+    overlay.className="img-modal-overlay";
+    overlay.innerHTML=`
+      <div class="img-modal-top">
+        <div class="img-modal-close" id="imgModalClose">✕ ปิด</div>
+      </div>
+      <div class="img-modal-body">
+        <img id="imgModalPic" src="" alt="เอกสาร">
+      </div>
+      <div class="img-modal-hint">📌 กดค้างที่รูปภาพด้านบนเพื่อบันทึกลงเครื่อง หรือส่งต่อ</div>
+    `;
+    document.body.appendChild(overlay);
+    document.getElementById("imgModalClose").addEventListener("click",hideImageModal);
+  }
+  document.getElementById("imgModalPic").src=dataUrl;
+  overlay.style.display="flex";
+}
+function hideImageModal(){
+  const overlay=document.getElementById("imgModalOverlay");
+  if(overlay) overlay.style.display="none";
+}
+
+async function shareImageNative(){
+  if(typeof html2canvas==="undefined"){ showToast("โหลดตัวสร้างรูปภาพไม่สำเร็จ ลองใหม่อีกครั้ง"); return; }
+  showToast("กำลังเตรียมรูปภาพ...");
+  const node=document.querySelector(".doc-paper");
+  try{
+    const canvas=await html2canvas(node,{scale:2,backgroundColor:"#ffffff",useCORS:true});
+    const fileName=(state.activeDoc.docNo||"document")+".png";
+    const dataUrl=canvas.toDataURL("image/png");
+    let shared=false;
+    try{
+      const blob=await new Promise(res=>canvas.toBlob(res,"image/png"));
+      if(blob){
+        const file=new File([blob],fileName,{type:"image/png"});
+        if(navigator.canShare && navigator.canShare({files:[file]})){
+          await navigator.share({files:[file],title:fileName});
+          shared=true;
+        }
+      }
+    }catch(e){ /* share failed, blocked, or user cancelled — fall through to guaranteed method */ }
+    if(!shared) showImageModal(dataUrl,fileName);
+  }catch(e){ showToast("สร้างรูปภาพไม่สำเร็จ"); }
+}
+
+/* ================= IMAGE / PDF EXPORT ================= */
+async function exportImage(){
+  if(typeof html2canvas==="undefined"){ showToast("โหลดตัวสร้างรูปภาพไม่สำเร็จ ลองใหม่อีกครั้ง"); return; }
+  showToast("กำลังสร้างรูปภาพ...");
+  const node=document.querySelector(".doc-paper");
+  try{
+    const canvas=await html2canvas(node,{scale:2,backgroundColor:"#ffffff",useCORS:true});
+    const dataUrl=canvas.toDataURL("image/png");
+    showImageModal(dataUrl,(state.activeDoc.docNo||"document")+".png");
+  }catch(e){ showToast("สร้างรูปภาพไม่สำเร็จ"); }
+}
+async function exportPDF(){
+  if(typeof html2canvas==="undefined" || !window.jspdf){ showToast("โหลดตัวสร้าง PDF ไม่สำเร็จ ลองใหม่อีกครั้ง"); return; }
+  showToast("กำลังสร้าง PDF...");
+  const node=document.querySelector(".doc-paper");
+  try{
+    const canvas=await html2canvas(node,{scale:2,backgroundColor:"#ffffff",useCORS:true});
+    const imgData=canvas.toDataURL("image/png");
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({unit:"pt",format:"a4"});
+    const pageWidth=pdf.internal.pageSize.getWidth();
+    const imgWidth=pageWidth-40;
+    const imgHeight=canvas.height*imgWidth/canvas.width;
+    pdf.addImage(imgData,"PNG",20,20,imgWidth,imgHeight);
+    try{
+      pdf.save((state.activeDoc.docNo||"document")+".pdf");
+      showToast("ดาวน์โหลด PDF แล้ว — ถ้าไม่เห็นไฟล์ ให้เปิดหน้านี้ในเบราว์เซอร์แทน");
+    }catch(e){
+      showImageModal(imgData,(state.activeDoc.docNo||"document")+".png");
+      showToast("ดาวน์โหลด PDF ไม่สำเร็จ แสดงเป็นรูปภาพให้แทน");
+    }
+  }catch(e){ showToast("สร้าง PDF ไม่สำเร็จ"); }
+}
+
+/* ================= SETTINGS ================= */
+async function saveSettings(){
+  const ok=await safeSet("shop-settings",state.shop);
+  showToast(ok ? "บันทึกข้อมูลร้านแล้ว" : "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง หรือลดขนาดโลโก้แล้วลองใหม่ หรือปิดโหมดท่องเว็บแบบส่วนตัว");
+}
+function backupData(){
+  const payload={
+    exportedAt:new Date().toISOString(),
+    shop:state.shop,
+    history:state.history,
+    quickItems:state.quickItems,
+    theme:state.theme,
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  const d=new Date();
+  a.href=url;
+  a.download=`airbantook-service-backup-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("ดาวน์โหลดไฟล์สำรองแล้ว");
+}
+function restoreFromFile(file){
+  const reader=new FileReader();
+  reader.onload=async ()=>{
+    try{
+      const data=JSON.parse(reader.result);
+      if(data.shop) state.shop={...DEFAULT_SHOP,...data.shop};
+      if(Array.isArray(data.history)) state.history=data.history;
+      if(Array.isArray(data.quickItems)&&data.quickItems.length) state.quickItems=data.quickItems;
+      if(THEME_LABELS[data.theme]) state.theme=data.theme;
+      const results=await Promise.all([
+        safeSet("shop-settings",state.shop),
+        safeSet("quotes-history",state.history),
+        safeSet("quick-items",state.quickItems),
+        safeSet("ui-theme",state.theme),
+      ]);
+      applyAccent(state.shop.accent||"navy");
+      render();
+      showToast(results.every(Boolean) ? "กู้คืนข้อมูลสำเร็จ" : "กู้คืนบางส่วนไม่สำเร็จ ลองอีกครั้ง");
+    }catch(e){ showToast("ไฟล์ไม่ถูกต้อง กู้คืนไม่สำเร็จ"); }
+  };
+  reader.readAsText(file);
+}
+async function clearAllData(){
+  if(!confirm("ล้างข้อมูลร้าน ประวัติ และรายการเร็วทั้งหมด? กระทำนี้ย้อนกลับไม่ได้")) return;
+  state.shop={...DEFAULT_SHOP};
+  state.history=[];
+  state.quickItems=DEFAULT_QUICK_ITEMS.slice();
+  state.theme="standard";
+  const results=await Promise.all([
+    safeSet("shop-settings",state.shop),
+    safeSet("quotes-history",state.history),
+    safeSet("quick-items",state.quickItems),
+    safeSet("ui-theme",state.theme),
+  ]);
+  applyAccent("navy");
+  render();
+  showToast(results.every(Boolean) ? "ล้างข้อมูลทั้งหมดแล้ว" : "ล้างข้อมูลบางส่วนไม่สำเร็จ ลองอีกครั้ง");
+}
+
+/* ================= RENDER ================= */
+function render(){
+  const app=document.getElementById("app");
+  if(state.view==="home") app.innerHTML=renderHome();
+  else if(state.view==="preview") app.innerHTML=renderPreview();
+  else if(state.view==="history") app.innerHTML=renderHistory();
+  else if(state.view==="settings") app.innerHTML=renderSettings();
+  attachGlobalInputHandlers();
+  if(state.view==="preview") renderPromptPayQR();
+  if(state.view==="home" && state.docType==="requisition") setupSignaturePad();
+}
+
+/* ================= SIGNATURE PAD (approver, optional) ================= */
+function setupSignaturePad(){
+  const canvas=document.getElementById("approverSigCanvas");
+  if(!canvas) return;
+  const rect=canvas.getBoundingClientRect();
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=Math.max(1,rect.width*dpr);
+  canvas.height=Math.max(1,rect.height*dpr);
+  const ctx=canvas.getContext("2d");
+  ctx.scale(dpr,dpr);
+  ctx.lineWidth=2.2;
+  ctx.lineCap="round";
+  ctx.lineJoin="round";
+  ctx.strokeStyle="#16213E";
+  if(state.approverSignature){
+    const img=new Image();
+    img.onload=()=>{ ctx.drawImage(img,0,0,rect.width,rect.height); };
+    img.src=state.approverSignature;
+  }
+  let drawing=false,lastX=0,lastY=0;
+  function pos(e){
+    const r=canvas.getBoundingClientRect();
+    return {x:e.clientX-r.left, y:e.clientY-r.top};
+  }
+  function start(e){
+    drawing=true;
+    const p=pos(e);
+    lastX=p.x; lastY=p.y;
+    try{ canvas.setPointerCapture(e.pointerId); }catch(err){}
+  }
+  function move(e){
+    if(!drawing) return;
+    const p=pos(e);
+    ctx.beginPath();
+    ctx.moveTo(lastX,lastY);
+    ctx.lineTo(p.x,p.y);
+    ctx.stroke();
+    lastX=p.x; lastY=p.y;
+  }
+  function end(){
+    if(!drawing) return;
+    drawing=false;
+    state.approverSignature=canvas.toDataURL("image/png");
+  }
+  canvas.addEventListener("pointerdown",start);
+  canvas.addEventListener("pointermove",move);
+  canvas.addEventListener("pointerup",end);
+  canvas.addEventListener("pointerleave",end);
+  canvas.addEventListener("pointercancel",end);
+}
+function clearSignature(){
+  state.approverSignature="";
+  const canvas=document.getElementById("approverSigCanvas");
+  if(canvas){ const ctx=canvas.getContext("2d"); ctx.clearRect(0,0,canvas.width,canvas.height); }
+  showToast("ล้างลายเซ็นแล้ว");
+}
+
+function header(){
+  return `
+  <div class="app-header">
+    <div class="brand-row">
+      <span class="brand-icon">❄️</span>
+      <span class="brand-name">Airbantook Service</span>
+    </div>
+    <div class="header-tagline">สร้างใบเสนอราคา/ใบเสร็จสวย ๆ ส่งลูกค้าทาง LINE ได้ใน 30 วินาที</div>
+  </div>`;
+}
+
+function totalsBoxInner(){
+  if(state.docType==="requisition"){
+    const totalQty=state.items.reduce((s,i)=>s+(Number(i.qty)||0),0);
+    return `
+      <div class="totals-row"><span>จำนวนรายการ</span><span>${state.items.length} รายการ</span></div>
+      <div class="totals-row net"><span class="label">รวมจำนวนทั้งหมด</span><span class="value">${totalQty} ชิ้น</span></div>
+    `;
+  }
+  const isQuote=state.docType==="quote";
+  return `
+    <div class="totals-row"><span>ยอดรวม (${state.items.length} รายการ)</span><span>฿${baht(subtotal())}</span></div>
+    <div class="totals-row"><span>ส่วนลด</span><span>฿${baht(state.discount)}</span></div>
+    ${(isQuote && state.includeVat) ? `<div class="totals-row"><span>ภาษีมูลค่าเพิ่ม 7%</span><span>฿${baht(vatAmount())}</span></div>` : ""}
+    <div class="totals-row net"><span class="label">${isQuote?"ยอดสุทธิ":"ยอดชำระสุทธิ"}</span><span class="value">฿${baht(netTotal())}</span></div>
+  `;
+}
+
+function renderHome(){
+  const isQuote=state.docType==="quote";
+  const isReceipt=state.docType==="receipt";
+  const isReq=state.docType==="requisition";
+  const docLabel=isQuote?"ใบเสนอราคา":isReceipt?"ใบเสร็จ":"ใบเบิกสินค้า";
+  return `
+  ${header()}
+  <div class="doctabs">
+    <div class="doctab ${isQuote?"active":""}" data-act="doctype" data-val="quote">📄 ใบเสนอราคา</div>
+    <div class="doctab ${isReceipt?"active":""}" data-act="doctype" data-val="receipt">🧾 ใบเสร็จรับเงิน</div>
+    <div class="doctab ${isReq?"active":""}" data-act="doctype" data-val="requisition">📦 ใบเบิกสินค้า</div>
+  </div>
+
+  ${isReq ? `
+  <div class="section">
+    <div class="section-title"><span class="n">🏬</span> ข้อมูลการเบิก</div>
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label">ร้านค้า</label>
+        <input type="text" data-bind="req.store" value="${esc(state.req.store)}" placeholder="เช่น ร้านอะไหล่แอร์ / คลังสินค้า">
+      </div>
+      <div class="field">
+        <label class="field-label">ผู้เบิกของ</label>
+        <input type="text" data-bind="req.requester" value="${esc(state.req.requester)}" placeholder="ชื่อช่างผู้เบิก">
+      </div>
+    </div>
+  </div>` : `
+  <div class="section">
+    <div class="section-title"><span class="n">👤</span> ข้อมูลลูกค้า</div>
+    <div class="field">
+      <label class="field-label">ชื่อลูกค้า</label>
+      <input type="text" data-bind="customer.name" value="${esc(state.customer.name)}" placeholder="เช่น คุณสมชาย / บ้านคุณเจน">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label">เบอร์โทร</label>
+        <input type="tel" data-bind="customer.phone" value="${esc(state.customer.phone)}" placeholder="08x-xxx-xxxx">
+      </div>
+      <div class="field">
+        <label class="field-label">สถานที่</label>
+        <input type="text" data-bind="customer.location" value="${esc(state.customer.location)}" placeholder="เช่น คอนโด/บ้าน">
+      </div>
+    </div>
+  </div>`}
+
+  <div class="section">
+    ${isReq ? `<div class="section-title"><span class="n">📦</span> รายการที่เบิก</div>` : `
+    <div class="section-title"><span class="n">⚡</span> เลือกรายการเร็ว (กดเพื่อเพิ่ม / กดอีกครั้งเพื่อออก)</div>
+    <div class="quick-grid">
+      ${state.quickItems.slice(0,6).map((q,idx)=>{
+        const active=state.items.some(i=>i.desc===q.desc && i.fromQuick);
+        return `<div class="quick-chip ${active?"active":""}" data-act="quick" data-idx="${idx}">
+          <div class="qc-name">${esc(q.desc)}</div>
+          <div class="qc-price">฿${baht(q.price)} /${esc(q.unit)}</div>
+        </div>`;
+      }).join("")}
+    </div>
+    ${state.quickItems.length>6?`
+    <div class="field">
+      <label class="field-label">รายการอื่น ๆ (เลือกจากรายการเพื่อเพิ่ม)</label>
+      <select id="moreQuickSelect">
+        <option value="">— เลือกรายการ —</option>
+        ${state.quickItems.slice(6).map((q,i)=>`<option value="${i+6}">${esc(q.desc)} — ฿${baht(q.price)}/${esc(q.unit)}</option>`).join("")}
+      </select>
+    </div>`:""}
+    <div class="divider-label">หรือเพิ่มรายการเอง</div>
+    `}
+    <div class="field">
+      <label class="field-label">รายละเอียด</label>
+      <input type="text" data-bind="draft.desc" value="${esc(state.draft.desc)}" placeholder="${isReq?"เช่น สายไฟ VCT 2x1.5":"เช่น ติดตั้งแอร์ Daikin 18000 BTU"}">
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">จำนวน</label><input type="number" min="0" data-bind="draft.qty" value="${state.draft.qty}"></div>
+      <div class="field"><label class="field-label">หน่วย</label><input type="text" data-bind="draft.unit" value="${esc(state.draft.unit)}"></div>
+      ${isReq?"":`<div class="field"><label class="field-label">ราคา/หน่วย</label><input type="number" min="0" data-bind="draft.price" value="${state.draft.price}"></div>`}
+    </div>
+    <button class="add-btn" data-act="addItem">+ เพิ่มรายการนี้</button>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="n">📋</span> รายการใน${docLabel}</div>
+    ${state.items.length===0 ? `<div class="empty-note">ยังไม่มีรายการ — ${isReq?"เพิ่มรายการที่ต้องการเบิกด้านบนได้เลย":"กดเลือกรายการเร็วด้านบนได้เลย"}</div>` :
+      state.items.map(it=>`
+        <div class="item-row" data-id="${it.id}">
+          <div class="item-main">
+            <div class="item-desc">${esc(it.desc)}</div>
+            <div class="item-sub">
+              <input class="mini-input" type="number" min="0" value="${it.qty}" data-item="${it.id}" data-field="qty">
+              <span class="item-unit">${esc(it.unit)}</span>
+              ${isReq?"":`
+              <span class="item-x">×</span>
+              <input class="mini-input price" type="number" min="0" value="${it.price}" data-item="${it.id}" data-field="price">
+              <span class="item-unit">บาท</span>`}
+            </div>
+          </div>
+          ${isReq?"":`<div class="line-total">฿${baht(it.qty*it.price)}</div>`}
+          <button class="remove-btn" data-act="removeItem" data-id="${it.id}">✕</button>
+        </div>
+      `).join("")
+    }
+  </div>
+
+  ${isReq ? `
+  <div class="section">
+    <div class="section-title"><span class="n">📝</span> รายละเอียดเพิ่มเติม</div>
+    <textarea data-bind="notes" placeholder="เช่น เบิกไปใช้กับงานติดตั้งบ้านคุณเจต">${esc(state.notes)}</textarea>
+  </div>
+  <div class="section">
+    <div class="section-title"><span class="n">✍️</span> ลายเซ็นผู้อนุมัติ (ถ้ามี)</div>
+    <div class="section-note">เซ็นด้วยนิ้วหรือเมาส์ได้เลย ถ้าไม่เซ็นตอนนี้ เอกสารจะเว้นเส้นว่างไว้ให้เซ็นด้วยปากกาทีหลังแทน แล้วแต่งาน</div>
+    <div class="sig-pad-wrap"><canvas id="approverSigCanvas" class="sig-pad-canvas"></canvas></div>
+    <button class="secondary-btn" data-act="clearSig">🧹 ล้างลายเซ็น</button>
+  </div>` : `
+  <div class="section">
+    <div class="section-title"><span class="n">💸</span> ส่วนลด / หมายเหตุ</div>
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label">ส่วนลด (บาท)</label>
+        <input type="number" min="0" id="discountInput" data-bind="discount" value="${state.discount}">
+      </div>
+      ${isQuote ? `
+      <div class="field">
+        <label class="field-label">รับประกัน</label>
+        <select data-bind="warranty">
+          ${WARRANTY_OPTIONS.map(w=>`<option ${w===state.warranty?"selected":""}>${w}</option>`).join("")}
+        </select>
+      </div>` : `
+      <div class="field">
+        <label class="field-label">ชำระโดย</label>
+        <select data-bind="payment.method">
+          <option value="cash" ${state.payment.method==="cash"?"selected":""}>เงินสด</option>
+          <option value="transfer" ${state.payment.method==="transfer"?"selected":""}>โอนเงิน</option>
+        </select>
+      </div>`}
+    </div>
+    ${isQuote ? `
+    <div class="field" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div>
+        <div style="font-weight:600;font-size:14px;">คิดภาษีมูลค่าเพิ่ม (VAT 7%)</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">ราคาที่กรอกถือเป็นราคาก่อนภาษี (ราคาถอดแวต) ระบบจะบวก VAT 7% ให้อัตโนมัติ</div>
+      </div>
+      <div class="switch ${state.includeVat?"on":""}" data-act="toggleVat"><div class="knob"></div></div>
+    </div>` : ""}
+    ${(!isQuote && state.payment.method==="cash") ? `
+    <div class="field">
+      <label class="field-label">รับเงินมา (บาท)</label>
+      <input type="number" min="0" data-bind="payment.received" value="${state.payment.received}">
+    </div>` : ""}
+    <div class="field">
+      <label class="field-label">หมายเหตุ</label>
+      <textarea data-bind="notes" placeholder="เช่น ราคารวมค่าติดตั้งและอุปกรณ์ / มัดจำ 50% ก่อนเริ่มงาน">${esc(state.notes)}</textarea>
+    </div>
+  </div>`}
+
+  <div class="totals-box" id="totalsBox">${totalsBoxInner()}</div>
+
+  <button class="primary-btn ${isReceipt?"gold":""}" data-act="preview">👁️ ดูตัวอย่าง &amp; สร้าง${docLabel}</button>
+
+  ${bottomNav("home")}
+  `;
+}
+
+/* ---- document template helper builders ---- */
+function docHeaderStandardHTML(doc){
+  const isQuote=doc.docType==="quote";
+  return `
+  <div class="doc-head-v2">
+    <div class="head-left">
+      <div class="doc-logo-box">${doc.shop.logo?`<img src="${doc.shop.logo}">`:"❄️"}</div>
+      <div style="min-width:0;">
+        <div class="shop-name">${esc(doc.shop.name)||"ร้านของคุณ"}</div>
+        ${doc.shop.tagline?`<div class="shop-tagline">${esc(doc.shop.tagline)}</div>`:""}
+      </div>
+    </div>
+    <div class="head-right">
+      <div class="doc-eng-label">${isQuote?"QUOTATION":"RECEIPT"}</div>
+      <div class="doc-th-label">${isQuote?"ใบเสนอราคา":"ใบเสร็จรับเงิน"}</div>
+      <div class="doc-no">เลขที่: ${doc.docNo}</div>
+      <div class="doc-date">วันที่: ${thaiDate(new Date(doc.dateISO))}</div>
+    </div>
+  </div>
+  <div class="head-divider"></div>`;
+}
+function docHeroHeaderHTML(doc){
+  const isQuote=doc.docType==="quote";
+  return `<div class="doc-hero">
+    <div class="doc-pill">${isQuote?"ใบเสนอราคา / QUOTATION":"ใบเสร็จรับเงิน / RECEIPT"}</div>
+    <div class="hero-shop-name">${esc(doc.shop.name)||"ร้านของคุณ"}</div>
+  </div>`;
+}
+function docInfoBoxHTML(doc){
+  return `<div class="doc-info-box">
+    <div class="info-row"><span class="k">นามลูกค้า:</span><b>${esc(doc.customer.name)||"-"}</b></div>
+    ${doc.customer.phone?`<div class="info-row"><span class="k">เบอร์ติดต่อ:</span><b>${esc(doc.customer.phone)}</b></div>`:""}
+    ${doc.customer.location?`<div class="info-row"><span class="k">สถานที่:</span><b>${esc(doc.customer.location)}</b></div>`:""}
+  </div>`;
+}
+function docInlineCustomerHTML(doc){
+  return `<div class="inline-customer-row">
+    เรียน <b>${esc(doc.customer.name)||"-"}</b>${doc.customer.phone?`&nbsp;&nbsp;เบอร์โทร <b>${esc(doc.customer.phone)}</b>`:""}
+    ${doc.customer.location?`<br>สถานที่ <b>${esc(doc.customer.location)}</b>`:""}
+  </div>`;
+}
+function docTwoColRowHTML(doc){
+  const locPhone=[esc(doc.customer.location||""),esc(doc.customer.phone||"")].filter(Boolean).join(" · ");
+  return `<div class="two-col-row">
+    <div><div class="k">เรียน / ลูกค้า</div><div class="v-bold">${esc(doc.customer.name)||"-"}</div>${locPhone?`<div class="v-sub">${locPhone}</div>`:""}</div>
+    <div style="text-align:right;"><div class="k">เลขที่เอกสาร</div><div class="v-bold">${doc.docNo}</div><div class="v-sub">${thaiDate(new Date(doc.dateISO))}</div></div>
+  </div>`;
+}
+function docItemTableHTML(doc,style){
+  let thStyle="color:var(--muted);border-bottom:1.5px solid var(--navy);padding:0 0 6px;";
+  if(style==="navy") thStyle="background:var(--navy);color:#fff;padding:8px 6px;";
+  else if(style==="light") thStyle="background:var(--ice-light);color:var(--ice-deep);padding:8px 6px;";
+  return `<table class="doc-table doc-table-${style}">
+    <tr>
+      <th style="${thStyle}">#</th>
+      <th style="${thStyle}">รายละเอียดรายการ</th>
+      <th class="r" style="${thStyle}">จำนวน</th>
+      <th class="r" style="${thStyle}">ราคา/หน่วย</th>
+      <th class="r" style="${thStyle}">จำนวนเงิน</th>
+    </tr>
+    ${doc.items.map((it,idx)=>`<tr><td>${idx+1}</td><td>${esc(it.desc)}</td><td class="r">${it.qty} ${esc(it.unit)}</td><td class="r">฿${baht(it.price)}</td><td class="r">฿${baht(it.qty*it.price)}</td></tr>`).join("")}
+  </table>`;
+}
+function docTotalsMiniHTML(doc){
+  const isQuote=doc.docType==="quote";
+  let rows=`<div class="row"><span>ยอดรวมก่อนส่วนลด</span><span>฿${baht(doc.subtotal)}</span></div>`;
+  if(doc.discount>0) rows+=`<div class="row"><span>ส่วนลด</span><span>-฿${baht(doc.discount)}</span></div>`;
+  if(isQuote && doc.includeVat) rows+=`<div class="row"><span>ภาษีมูลค่าเพิ่ม 7%</span><span>฿${baht(doc.vat)}</span></div>`;
+  if(!isQuote){
+    rows+=`<div class="row"><span>ชำระโดย</span><span>${doc.payment.method==="cash"?"เงินสด":"โอนเงิน"}</span></div>`;
+    if(doc.payment.method==="cash"){
+      rows+=`<div class="row"><span>รับเงิน</span><span>฿${baht(doc.payment.received)}</span></div>`;
+      rows+=`<div class="row"><span>เงินทอน</span><span>฿${baht(Math.max(0,(Number(doc.payment.received)||0)-doc.total))}</span></div>`;
+    }
+  }
+  rows+=`<div class="row net"><span>${isQuote?"ยอดชำระสุทธิ":"ยอดชำระ"}</span><span>฿${baht(doc.total)}</span></div>`;
+  return rows;
+}
+function docCalloutTotalHTML(doc,label){
+  return `<div class="callout-total"><div class="lbl">${label}</div><div class="amt">฿${baht(doc.total)}</div></div>`;
+}
+function docCalloutTotalInlineHTML(doc,label){
+  return `<div class="callout-total-inline"><div class="lbl">${label}</div><div class="amt">฿${baht(doc.total)}</div></div>`;
+}
+function docTermsBoxHTML(doc,tone){
+  const isQuote=doc.docType==="quote";
+  const lines=[];
+  if(isQuote) lines.push(`🛡️ <b>รับประกันงาน:</b> ${esc(doc.warranty)}`);
+  if(doc.shop.paymentTerms) lines.push(`🔧 <b>เงื่อนไขติดตั้ง:</b> ${esc(doc.shop.paymentTerms)}`);
+  if(doc.shop.bankInfo) lines.push(`🏦 <b>บัญชีโอนเงิน:</b> ${esc(doc.shop.bankInfo)}`);
+  if(doc.notes) lines.push(`📝 ${esc(doc.notes)}`);
+  if(lines.length===0) return "";
+  return `<div class="terms-box ${tone==="premium"?"premium-tone":""}"><div class="terms-title">เงื่อนไข &amp; หมายเหตุ</div>${lines.map(l=>`<div class="terms-line">${l}</div>`).join("")}</div>`;
+}
+function docSignatureHTML(doc,mode){
+  if(!doc.shop.showSignature) return "";
+  if(mode==="dual"){
+    return `<div class="sign-grid-2">
+      <div class="box"><div class="line"></div><div class="lbl">ผู้รับข้อเสนอ / ลูกค้า</div><div class="date-ph">วันที่ ....../....../......</div></div>
+      <div class="box"><div class="line"></div><div class="lbl">ผู้เสนอราคา / ${esc(doc.shop.name)||"ผู้ให้บริการ"}</div><div class="date-ph">วันที่ ....../....../......</div></div>
+    </div>`;
+  }
+  return `<div class="sign-single"><div class="box"><div class="line"></div><div class="lbl">ช่างผู้ดำเนินงาน</div></div></div>`;
+}
+function docBodyHTML(doc){
+  const isQuote=doc.docType==="quote";
+  const promptpayBlock = doc.shop.promptpay ? `<div class="doc-pp"><div class="lbl">สแกนจ่ายผ่านพร้อมเพย์ · ฿${baht(doc.total)}</div><div class="qrwrap" id="ppqr"></div></div>` : "";
+  const contactBits=[];
+  if(doc.shop.phone) contactBits.push("โทร "+esc(doc.shop.phone));
+  if(doc.shop.lineId) contactBits.push("LINE "+esc(doc.shop.lineId));
+  if(doc.shop.lineLink) contactBits.push(`<a href="${esc(doc.shop.lineLink)}" style="color:inherit;">${esc(doc.shop.lineLink)}</a>`);
+  const contactLine = contactBits.length ? `<div class="doc-contact">${contactBits.join(" · ")}</div>` : "";
+  const addressLine = doc.shop.address ? `<div class="doc-contact">${esc(doc.shop.address)}</div>` : "";
+  const thanksLine = `<div class="doc-thanks">${doc.shop.footerNote?esc(doc.shop.footerNote):"ขอบคุณที่ไว้วางใจใช้บริการ 🙏"}</div>${addressLine}${contactLine}<div class="doc-foot">สร้างด้วย Airbantook Service</div>`;
+
+  if(state.theme==="premium"){
+    const netRows=`
+      <div class="row"><span>ยอดรวมก่อนส่วนลด</span><span>฿${baht(doc.subtotal)}</span></div>
+      ${doc.discount>0?`<div class="row"><span>ส่วนลด</span><span>-฿${baht(doc.discount)}</span></div>`:""}
+      ${(isQuote && doc.includeVat)?`<div class="row"><span>ภาษีมูลค่าเพิ่ม 7%</span><span>฿${baht(doc.vat)}</span></div>`:""}
+      ${!isQuote?`<div class="row"><span>ชำระโดย</span><span>${doc.payment.method==="cash"?"เงินสด":"โอนเงิน"}</span></div>${doc.payment.method==="cash"?`<div class="row"><span>รับเงิน</span><span>฿${baht(doc.payment.received)}</span></div><div class="row"><span>เงินทอน</span><span>฿${baht(Math.max(0,(Number(doc.payment.received)||0)-doc.total))}</span></div>`:""}`:""}
+      <div class="divider-dashed"></div>
+      <div class="row net"><span>${isQuote?"ยอดชำระสุทธิ":"ยอดชำระ"}</span><span>฿${baht(doc.total)}</span></div>`;
+    return `
+      ${docHeroHeaderHTML(doc)}
+      ${docTwoColRowHTML(doc)}
+      ${docItemTableHTML(doc,"plain")}
+      <div class="premium-totals-box">${netRows}</div>
+      ${docTermsBoxHTML(doc,"premium")}
+      ${docSignatureHTML(doc,"dual")}
+      ${promptpayBlock}
+      ${thanksLine}
+    `;
+  }
+  if(state.theme==="classic"){
+    const termsHtml=docTermsBoxHTML(doc,"neutral");
+    return `
+      ${docHeaderStandardHTML(doc)}
+      ${docInlineCustomerHTML(doc)}
+      ${docItemTableHTML(doc,"navy")}
+      <div class="footer-2col">
+        ${docCalloutTotalInlineHTML(doc,"ยอดที่ต้องชำระ")}
+        <div class="totals-mini-box">${docTotalsMiniHTML(doc)}</div>
+      </div>
+      ${termsHtml}
+      ${docSignatureHTML(doc,"dual")}
+      ${promptpayBlock}
+      ${thanksLine}
+    `;
+  }
+  // standard
+  const termsHtml=docTermsBoxHTML(doc,"neutral");
+  const totalsHtml=`<div class="totals-mini-box">${docTotalsMiniHTML(doc)}</div>`;
+  const footerBlock = termsHtml ? `<div class="footer-2col">${termsHtml}${totalsHtml}</div>` : totalsHtml;
+  return `
+    ${docHeaderStandardHTML(doc)}
+    ${docInfoBoxHTML(doc)}
+    ${docItemTableHTML(doc,"light")}
+    ${footerBlock}
+    ${docCalloutTotalHTML(doc,"ยอดที่ต้องชำระ")}
+    ${docSignatureHTML(doc,"dual")}
+    ${promptpayBlock}
+    ${thanksLine}
+  `;
+}
+
+function docBodyRequisitionHTML(doc){
+  return `
+    <div style="text-align:center;">
+      <div class="shop-name" style="font-size:19px;">${esc(doc.shop.name)||"ร้านแอร์บ้านถูก"}</div>
+      <div style="font-family:'Kanit',sans-serif;font-weight:600;font-size:16px;color:var(--navy);margin-top:4px;">ใบเบิกสินค้า</div>
+    </div>
+    <div style="height:16px"></div>
+    <div class="req-meta-row"><span>เลขที่: <b>${doc.docNo}</b></span><span>วันที่: <b>${thaiDate(new Date(doc.dateISO))}</b></span></div>
+    <div class="req-meta-row"><span>ร้านค้า: <b>${esc(doc.req.store)||"-"}</b></span><span>ผู้เบิกของ: <b>${esc(doc.req.requester)||"-"}</b></span></div>
+    <table class="doc-table doc-table-light" style="margin-top:12px;">
+      <tr>
+        <th style="background:var(--ice-light);color:var(--ice-deep);padding:8px 6px;">#</th>
+        <th style="background:var(--ice-light);color:var(--ice-deep);padding:8px 6px;">รายการ</th>
+        <th class="r" style="background:var(--ice-light);color:var(--ice-deep);padding:8px 6px;">หน่วย</th>
+        <th class="r" style="background:var(--ice-light);color:var(--ice-deep);padding:8px 6px;">จำนวน</th>
+      </tr>
+      ${doc.items.map((it,idx)=>`<tr><td>${idx+1}</td><td>${esc(it.desc)}</td><td class="r">${esc(it.unit)}</td><td class="r">${it.qty}</td></tr>`).join("")}
+      <tr><td colspan="3" style="text-align:right;font-weight:700;color:var(--navy);">รวมจำนวนทั้งหมด</td><td class="r" style="font-weight:700;color:var(--navy);">${doc.totalQty}</td></tr>
+    </table>
+    ${doc.notes?`<div class="doc-note">📝 รายละเอียดเพิ่มเติม: ${esc(doc.notes)}</div>`:""}
+    <div class="sign-grid-2">
+      <div class="box"><div class="line"></div><div class="lbl">ผู้เบิกสินค้า</div></div>
+      <div class="box">${doc.approverSignature?`<img src="${doc.approverSignature}" style="max-height:50px;max-width:100%;display:block;margin:0 auto 6px;">`:`<div class="line"></div>`}<div class="lbl">ผู้อนุมัติ</div></div>
+    </div>
+    <div class="doc-foot">สร้างด้วย Airbantook Service</div>
+  `;
+}
+
+function renderPreview(){
+  const doc=state.activeDoc;
+  if(!doc) { goView("home"); return ""; }
+  const isQuote=doc.docType==="quote";
+  const isReq=doc.docType==="requisition";
+  const titleLabel=isReq?"ใบเบิกสินค้า":isQuote?"ใบเสนอราคา":"ใบเสร็จรับเงิน";
+  return `
+  <div class="preview-top">
+    <div class="back-btn" data-act="backHome">←</div>
+    <div class="t">ตัวอย่าง${titleLabel}${isLicensed()?"":' <span style="font-size:11px;font-weight:600;color:#8A6D1D;background:#FFF3DC;padding:2px 8px;border-radius:10px;margin-left:4px;">ทดลองใช้งาน</span>'}</div>
+  </div>
+
+  ${isReq ? "" : `
+  <div class="theme-picker">
+    ${Object.keys(THEME_LABELS).map(t=>`<div class="theme-chip ${state.theme===t?"active":""}" data-act="theme" data-val="${t}">${THEME_LABELS[t]}</div>`).join("")}
+  </div>`}
+
+  <div class="doc-paper ${isReq?"":"theme-"+state.theme}">${watermarkOverlayHTML()}${isReq?docBodyRequisitionHTML(doc):docBodyHTML(doc)}</div>
+
+  <button class="primary-btn" data-act="exportImage">🖼️ บันทึกเป็นรูปภาพ</button>
+  <div class="btn-row">
+    <button class="secondary-btn btn-green" data-act="shareImage">💬 แชร์ให้ลูกค้า</button>
+    <button class="secondary-btn btn-orange" data-act="exportPDF">📄 ดาวน์โหลด PDF</button>
+  </div>
+  <button class="secondary-btn" data-act="shareLine">📨 ส่งข้อความทาง LINE</button>
+  <button class="secondary-btn" data-act="copyText">📋 คัดลอกข้อความ</button>
+  ${isQuote?`<button class="secondary-btn" data-act="convertReceipt">🧾 แปลงเป็นใบเสร็จ</button>`:""}
+  <button class="secondary-btn" data-act="saveDoc">${state.history.some(h=>h.id===doc.id)?"✅ บันทึกลงประวัติแล้ว":"💾 บันทึกลงประวัติ"}</button>
+  <button class="secondary-btn" data-act="backHome">✕ ปิด</button>
+  <div class="ghost-link" data-act="editDoc">← กลับไปแก้ไขรายการ</div>
+  <div style="text-align:center;font-size:11.5px;color:var(--muted);padding:10px 24px 0;line-height:1.6;">💡 ถ้ากดปุ่มด้านบนแล้วขึ้นหน้าจอ "เนื้อหาถูกบล็อก" ให้เปิดไฟล์นี้ในเบราว์เซอร์มือถือโดยตรง (Safari/Chrome) แทนการเปิดผ่านหน้าแชท</div>
+  <div style="height:24px"></div>
+  `;
+}
+
+function renderHistory(){
+  return `
+  ${header()}
+  <div class="page-title">ประวัติเอกสาร</div>
+  <div class="page-sub">${state.history.length} รายการที่บันทึกไว้</div>
+  <div style="margin-top:10px;">
+  ${state.history.length===0 ? `<div class="section"><div class="empty-note">ยังไม่มีประวัติ — สร้างใบเสนอราคาแล้วกด "บันทึกลงประวัติ"</div></div>` :
+    state.history.map(h=>`
+      <div class="hist-card" data-act="openHist" data-id="${h.id}">
+        <div class="hist-icon">${h.docType==="quote"?"📄":h.docType==="requisition"?"📦":"🧾"}</div>
+        <div class="hist-mid">
+          <div class="hist-name">${h.docType==="requisition" ? (esc(h.req.requester)||"ไม่ระบุผู้เบิก") : (esc(h.customer.name)||"ไม่ระบุชื่อ")}</div>
+          <div class="hist-date">${h.docNo} · ${thaiDate(new Date(h.dateISO))}</div>
+        </div>
+        <div class="hist-amt">${h.docType==="requisition" ? (h.totalQty+" ชิ้น") : ("฿"+baht(h.total))}</div>
+        <button class="hist-del" data-act="delHist" data-id="${h.id}">✕</button>
+      </div>
+    `).join("")
+  }
+  </div>
+  ${bottomNav("history")}
+  `;
+}
+
+function licenseStatusSectionHTML(){
+  if(isLicensed()){
+    const days=licenseDaysLeft();
+    const expiryThai=thaiDate(new Date(state.licenseExpiry));
+    return `
+    <div class="section" style="margin-top:20px;">
+      <div class="section-title"><span class="n">🔑</span> สถานะการใช้งาน</div>
+      <div style="background:#E7F7EF;border:1.5px solid #BEE6D0;border-radius:12px;padding:14px 16px;font-size:13.5px;color:#167A4C;line-height:1.7;">
+        ✅ สมาชิกแล้ว — ใช้งานได้ถึง <b>${expiryThai}</b> (เหลือ ${days} วัน)<br>
+        เอกสารของคุณจะไม่มีลายน้ำ
+      </div>
+    </div>`;
+  }
+  return `
+  <div class="section" style="margin-top:20px;">
+    <div class="section-title"><span class="n">🔑</span> สถานะการใช้งาน</div>
+    <div style="background:#FFF8E6;border:1.5px solid #F3DFA0;border-radius:12px;padding:14px 16px;font-size:13.5px;color:#8A6D1D;line-height:1.7;margin-bottom:14px;">
+      🕐 เวอร์ชันทดลอง — เอกสารที่สร้างจะมีลายน้ำ "ทดลองใช้งาน" กำกับไว้
+    </div>
+    <div class="section-note">สมัครสมาชิกเพื่อลบลายน้ำ:<br>• 6 เดือน — 499 บาท<br>• 1 ปี — 900 บาท<br>ทักแอดมินทาง LINE เพื่อชำระเงินและรับรหัสสมาชิก</div>
+    <a href="${ADMIN_CONTACT_LINE}" target="_blank" rel="noopener" style="text-decoration:none;">
+      <button class="secondary-btn" style="background:#06C755;color:#fff;border-color:#06C755;" type="button">💬 ติดต่อแอดมิน (LINE) เพื่อสมัครสมาชิก</button>
+    </a>
+    <div class="field" style="margin-top:14px;">
+      <label class="field-label">มีรหัสสมาชิกแล้ว? กรอกที่นี่</label>
+      <input type="text" id="licenseCodeInput" placeholder="กรอกรหัสสมาชิกที่ได้รับจากแอดมิน">
+    </div>
+    <button class="add-btn" data-act="applyLicense">🔓 ปลดล็อกด้วยรหัสสมาชิก</button>
+  </div>`;
+}
+
+function renderSettings(){
+  return `
+  ${header()}
+  <div class="page-title">ตั้งค่าร้าน</div>
+  <div class="page-sub">ข้อมูลนี้จะแสดงบนหัวใบเสนอราคาและใบเสร็จ — บันทึกไว้ในเบราว์เซอร์นี้อัตโนมัติ (หากล้างแคช/ข้อมูลเว็บไซต์ หรือเปลี่ยนเครื่อง ข้อมูลจะหาย แนะนำให้กดสำรองข้อมูลด้านล่างเก็บไว้เป็นระยะ)</div>
+
+  <div class="section">
+    <div class="field">
+      <label class="field-label">โลโก้ร้าน</label>
+      <div class="logo-row">
+        ${state.shop.logo?`<img src="${state.shop.logo}" class="logo-thumb">`:`<div class="logo-placeholder">🖼️</div>`}
+        <label class="secondary-btn file-label" style="margin:0;flex:1;">เลือกไฟล์
+          <input type="file" accept="image/*" id="logoFile" style="display:none;">
+        </label>
+        ${state.shop.logo?`<button class="remove-btn" data-act="removeLogo">✕</button>`:""}
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">ชื่อร้าน</label>
+      <input type="text" data-bind="shop.name" value="${esc(state.shop.name)}" placeholder="เช่น ช่างแอร์เอกชัย เซอร์วิส">
+    </div>
+    <div class="field">
+      <label class="field-label">แท็กไลน์ร้าน (แสดงใต้ชื่อร้านในเอกสาร)</label>
+      <input type="text" data-bind="shop.tagline" value="${esc(state.shop.tagline)}" placeholder="เช่น จำหน่าย ติดตั้ง ล้าง ย้าย ซ่อม แอร์ทุกชนิด">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label">เบอร์โทร</label>
+        <input type="tel" data-bind="shop.phone" value="${esc(state.shop.phone)}" placeholder="08x-xxx-xxxx">
+      </div>
+      <div class="field">
+        <label class="field-label">LINE ID</label>
+        <input type="text" data-bind="shop.lineId" value="${esc(state.shop.lineId)}" placeholder="@yourline">
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">ลิงก์ LINE OA (ให้ลูกค้ากดแอดเพื่อนได้เลย)</label>
+      <input type="text" data-bind="shop.lineLink" value="${esc(state.shop.lineLink)}" placeholder="เช่น https://lin.ee/xxxxxxx">
+    </div>
+    <div class="field">
+      <label class="field-label">ที่อยู่ร้าน (แสดงในเอกสาร)</label>
+      <textarea data-bind="shop.address" placeholder="เช่น 123 ถ.สุขุมวิท เขตวัฒนา กรุงเทพฯ">${esc(state.shop.address)}</textarea>
+    </div>
+    <div class="field">
+      <label class="field-label">เลขบัญชี / ชื่อบัญชี (โชว์บนใบ)</label>
+      <input type="text" data-bind="shop.bankInfo" value="${esc(state.shop.bankInfo)}" placeholder="เช่น ธ.กสิกร 123-4-56789-0 (สมชาย ใจดี)">
+    </div>
+    <div class="field">
+      <label class="field-label">📱 เบอร์/เลขพร้อมเพย์ (สร้าง QR ให้ลูกค้าสแกนจ่าย)</label>
+      <input type="text" data-bind="shop.promptpay" value="${esc(state.shop.promptpay)}" placeholder="เบอร์ 08x-xxx-xxxx หรือเลขบัตร ปชช. 13 หลัก">
+    </div>
+    <div class="field">
+      <label class="field-label">เงื่อนไขติดตั้ง</label>
+      <input type="text" data-bind="shop.paymentTerms" value="${esc(state.shop.paymentTerms)}" placeholder="เช่น ลูกค้าเตรียมจุดติดตั้ง/ปลั๊กไฟให้พร้อมก่อนช่างเข้างาน">
+    </div>
+    <div class="field">
+      <label class="field-label">คำโปรยท้ายใบ</label>
+      <input type="text" data-bind="shop.footerNote" value="${esc(state.shop.footerNote)}" placeholder="เช่น บริการด้วยใจ รับประกันงานทุกชิ้น">
+    </div>
+    <div class="field" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div>
+        <div style="font-weight:600;font-size:14px;">แสดงช่องเซ็นชื่อลูกค้า/ช่าง</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">เพิ่มพื้นที่สำหรับเซ็นรับรองท้ายเอกสาร</div>
+      </div>
+      <div class="switch ${state.shop.showSignature?"on":""}" data-act="toggleSignature"><div class="knob"></div></div>
+    </div>
+    <div class="field" style="margin-top:6px;">
+      <label class="field-label">สีหลักของแอป</label>
+      <div style="display:flex;gap:12px;margin-top:8px;">
+        ${Object.keys(ACCENT_PRESETS).map(k=>`<div class="accent-swatch ${state.shop.accent===k?"active":""}" data-act="accent" data-val="${k}" style="background:${ACCENT_PRESETS[k].ice};"></div>`).join("")}
+      </div>
+    </div>
+  </div>
+  <button class="primary-btn" data-act="saveSettings">💾 บันทึกข้อมูลร้าน</button>
+
+  ${licenseStatusSectionHTML()}
+
+  <div class="section" style="margin-top:20px;">
+    <div class="section-title"><span class="n">🛠️</span> จัดการรายการเร็ว</div>
+    <div class="section-note">รายการที่แตะเพิ่มได้ในหน้าสร้างใบ — แก้ราคาให้ตรงกับร้านคุณได้</div>
+    ${state.quickItems.map((q,idx)=>`
+      <div class="qi-card">
+        <div class="qi-info">
+          <div class="qi-item-name">${esc(q.desc)}</div>
+          <div class="qi-item-unit">/${esc(q.unit)}</div>
+        </div>
+        <input class="qi-price" type="number" data-qedit="${idx}" data-qfield="price" value="${q.price}">
+        <button class="qi-del" data-act="removeQuick" data-idx="${idx}">🗑️</button>
+      </div>
+    `).join("")}
+    <div class="divider-label">เพิ่มรายการเร็วใหม่</div>
+    <div class="field"><input type="text" id="newQDesc" placeholder="ชื่องาน เช่น ล้างแอร์ผนัง"></div>
+    <div class="field-row">
+      <div class="field"><input type="text" id="newQUnit" placeholder="หน่วย" value="เครื่อง"></div>
+      <div class="field"><input type="number" id="newQPrice" placeholder="ราคา" min="0"></div>
+    </div>
+    <button class="add-btn" data-act="addQuick">+ เพิ่มรายการเร็ว</button>
+    <button class="secondary-btn" data-act="saveQuick">💾 บันทึกรายการเร็ว</button>
+  </div>
+
+  <div class="section" style="margin-top:20px;">
+    <div class="section-title"><span class="n">🛡️</span> สำรอง / กู้คืนข้อมูล</div>
+    <div class="section-note">ข้อมูลร้าน ประวัติเอกสาร และรายการเร็ว บันทึกไว้ในเบราว์เซอร์นี้ให้อัตโนมัติ แต่จะหายได้หากล้างแคช/ข้อมูลเว็บไซต์ หรือเปลี่ยนเครื่อง/เบราว์เซอร์ — แนะนำให้กดสำรองข้อมูลเก็บเป็นไฟล์ไว้เป็นระยะ โดยเฉพาะก่อนล้างแคชหรือเปลี่ยนเครื่อง</div>
+    <button class="secondary-btn" data-act="backup">⬇️ สำรองข้อมูล (ดาวน์โหลดไฟล์)</button>
+    <label class="secondary-btn file-label">⬆️ กู้คืนข้อมูล (เลือกไฟล์)
+      <input type="file" accept="application/json" id="restoreFile" style="display:none;">
+    </label>
+  </div>
+
+  <div class="section" style="margin-top:20px;">
+    <div class="section-title"><span class="n">🔒</span> ความเป็นส่วนตัวของข้อมูล</div>
+    <div class="section-note">ข้อมูลลูกค้า รายการงาน และประวัติเอกสารของคุณ บันทึกอยู่ในเบราว์เซอร์ของเครื่องนี้เท่านั้น (localStorage) ไม่ถูกส่งขึ้นเซิร์ฟเวอร์ใด ๆ หรือให้บุคคลภายนอก</div>
+    <button class="secondary-btn" style="color:var(--danger);border-color:#F3C9C5;" data-act="clearAll">🗑️ ล้างข้อมูลลูกค้า/ประวัติทั้งหมด</button>
+  </div>
+
+  ${bottomNav("settings")}
+  `;
+}
+
+function bottomNav(active){
+  const items=[
+    {key:"home",ic:"🏠",label:"หน้าหลัก"},
+    {key:"history",ic:"📁",label:"ประวัติ"},
+    {key:"settings",ic:"🏢",label:"ตั้งค่าร้าน"},
+  ];
+  return `<div class="bottom-nav">
+    ${items.map(i=>`<div class="nav-item ${active===i.key?"active":""}" data-act="nav" data-val="${i.key}"><span class="ic">${i.ic}</span>${i.label}</div>`).join("")}
+  </div>`;
+}
+
+/* ================= EVENT DELEGATION ================= */
+document.addEventListener("click",function(e){
+  const el=e.target.closest("[data-act]");
+  if(!el) return;
+  const act=el.dataset.act;
+  if(act==="doctype") setDocType(el.dataset.val);
+  else if(act==="quick") toggleQuickItem(Number(el.dataset.idx));
+  else if(act==="addItem") addCustomItem();
+  else if(act==="removeItem") removeItem(el.dataset.id);
+  else if(act==="preview") openPreview();
+  else if(act==="nav") goView(el.dataset.val);
+  else if(act==="backHome") goView("home");
+  else if(act==="editDoc") goView("home");
+  else if(act==="shareLine") shareLine();
+  else if(act==="shareImage") shareImageNative();
+  else if(act==="copyText") copyDocText();
+  else if(act==="nativeShare") nativeShare();
+  else if(act==="saveDoc") saveActiveDoc();
+  else if(act==="openHist") openHistoryDoc(el.dataset.id);
+  else if(act==="delHist") deleteHistoryDoc(el.dataset.id,e);
+  else if(act==="saveSettings") saveSettings();
+  else if(act==="theme") setTheme(el.dataset.val);
+  else if(act==="accent") setAccent(el.dataset.val);
+  else if(act==="toggleSignature") toggleSignature();
+  else if(act==="toggleVat") toggleVat();
+  else if(act==="exportImage") exportImage();
+  else if(act==="exportPDF") exportPDF();
+  else if(act==="convertReceipt") convertQuoteToReceipt();
+  else if(act==="addQuick") addQuickPreset();
+  else if(act==="removeQuick") removeQuickPreset(Number(el.dataset.idx));
+  else if(act==="saveQuick") saveQuickItems();
+  else if(act==="backup") backupData();
+  else if(act==="clearAll") clearAllData();
+  else if(act==="removeLogo") removeLogo();
+  else if(act==="clearSig") clearSignature();
+  else if(act==="applyLicense") applyLicenseCode();
+});
+
+document.addEventListener("change",function(e){
+  if(e.target && e.target.id==="restoreFile" && e.target.files && e.target.files[0]){
+    restoreFromFile(e.target.files[0]);
+    e.target.value="";
+  }
+  if(e.target && e.target.id==="logoFile" && e.target.files && e.target.files[0]){
+    handleLogoUpload(e.target.files[0]);
+    e.target.value="";
+  }
+});
+
+function attachGlobalInputHandlers(){
+  document.querySelectorAll("[data-bind]").forEach(inp=>{
+    inp.addEventListener("input",()=>{
+      const path=inp.dataset.bind;
+      setField(path, inp.value);
+      if(path==="discount") updateTotalsBoxDom();
+    });
+  });
+  document.querySelectorAll("[data-item]").forEach(inp=>{
+    inp.addEventListener("input",()=>{
+      updateItemLive(inp.dataset.item, inp.dataset.field, inp.value);
+    });
+  });
+  document.querySelectorAll("[data-qedit]").forEach(inp=>{
+    inp.addEventListener("input",()=>{
+      updateQuickPresetLive(Number(inp.dataset.qedit), inp.dataset.qfield, inp.value);
+    });
+  });
+  const moreSel=document.getElementById("moreQuickSelect");
+  if(moreSel){
+    moreSel.addEventListener("change",()=>{
+      if(moreSel.value!=="") toggleQuickItem(Number(moreSel.value));
+    });
+  }
+}
+
+/* ================= GLOBAL ERROR SAFETY NET ================= */
+window.addEventListener("unhandledrejection",function(e){
+  console.warn("unhandled promise rejection:",(e.reason&&e.reason.message)||e.reason);
+  e.preventDefault();
+});
+window.addEventListener("error",function(e){
+  console.warn("runtime error:",e.message);
+});
+
+/* ================= INIT ================= */
+loadAll();
+</script>
+</body>
+</html>
